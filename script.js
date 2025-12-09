@@ -17,30 +17,37 @@ function loadOrders(){
     .catch(err => console.log(err));
 }
 
-function renderOrders(res){
+function renderOrders(res) {
   const box = document.getElementById("ordersContainer");
   box.innerHTML = "";
 
-  if(!res.data || res.data.length === 0){
+  if (!res.data || res.data.length === 0) {
     box.innerHTML = "<p>No orders found.</p>";
     return;
   }
 
   res.data.forEach(row => {
+    let orderId = row[0];        // Column A
+    let distributor = row[6];    // Column G
+    let orderReceived = row[8];  // Column I
+
     let card = document.createElement("div");
     card.className = "card";
-    card.innerHTML = `
-      <h3>Order #${row.OrderID}</h3>
-      <p><b>Distributor:</b> ${row.Distributor}</p>
-      <p><b>Order Received:</b> ${row.OrderReceived}</p>
 
-      <button class="btn btn-primary" onclick="openProcess('${row.OrderID}')">
+    card.innerHTML = `
+      <h3>Order #${orderId}</h3>
+      <p><b>Distributor:</b> ${distributor}</p>
+      <p><b>Order Received:</b> ${orderReceived}</p>
+
+      <button class="btn btn-primary" onclick="openProcess('${orderId}')">
         Process
       </button>
     `;
+
     box.appendChild(card);
   });
 }
+
 
 /* -------- OPEN PROCESS PAGE -------- */
 function openProcess(orderId){
