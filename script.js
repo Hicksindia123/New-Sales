@@ -1,5 +1,5 @@
 /* --------- BACKEND API URL --------- */
-const API = "https://script.google.com/macros/s/AKfycbwyupKc9VL7D4Wnrctl_yksIhS3dq3boLEFTFC0tX3i7WmVV23wfvZrv7DgEavsakZGiw/exec";
+const API = "https://script.google.com/macros/s/AKfycbxJlUCJqXzHOHXUZBGyzvih2LAN0ePc1gCnOhVe6KCzD7WhnpSPDdEsZRntVtIBwE4JCA/exec";
 
 /* --------- NAVIGATION --------- */
 function showPage(id){
