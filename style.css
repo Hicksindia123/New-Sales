@@ -1,0 +1,44 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f4f4;
+  margin: 0;
+}
+
+.nav {
+  background: #102a43;
+  padding: 12px;
+}
+
+.nav button {
+  background: #fff;
+  padding: 10px 15px;
+  margin-right: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.page { padding: 20px; }
+
+.card {
+  background: #ffffff;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.btn { padding: 10px 15px; border: none; border-radius:5px; cursor:pointer; }
+
+.btn-primary { background:#007BFF; color:white; }
+.btn-warning { background:#ff9800; color:white; }
+.btn-success { background:#4caf50; color:white; }
+
+.hidden { display:none; }
+
+.section {
+  margin-top: 15px;
+  padding: 10px;
+  background: #eef2f7;
+  border-left: 4px solid #007BFF;
+}
