@@ -1,87 +1,79 @@
-// 🔗 Replace this with YOUR Apps Script deployment URL
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxxxx/exec";
+/* --------- BACKEND API URL --------- */
+const API = "https://script.google.com/macros/s/AKfycbwyupKc9VL7D4Wnrctl_yksIhS3dq3boLEFTFC0tX3i7WmVV23wfvZrv7DgEavsakZGiw/exec";
 
+/* --------- NAVIGATION --------- */
+function showPage(id){
+  document.querySelectorAll(".page").forEach(p => p.style.display = "none");
+  document.getElementById(id).style.display = "block";
+}
+
+/* --------- LOAD ORDERS ON PAGE LOAD --------- */
 document.addEventListener("DOMContentLoaded", loadOrders);
 
-function showPage(p) {
-  document.querySelectorAll(".page").forEach(x => x.style.display="none");
-  document.getElementById(p).style.display="block";
+function loadOrders(){
+  fetch(API + "?action=getOrders")
+    .then(r => r.json())
+    .then(renderOrders)
+    .catch(err => console.log(err));
 }
 
-/* ---------- LOAD ORDERS FROM BACKEND ---------- */
-function loadOrders() {
-  fetch(WEB_APP_URL + "?action=getOrders")
-    .then(res => res.json())
-    .then(data => renderOrders(data));
-}
+function renderOrders(res){
+  const box = document.getElementById("ordersContainer");
+  box.innerHTML = "";
 
-function renderOrders(res) {
-  const container = document.getElementById("ordersContainer");
-  container.innerHTML = "";
-
-  if (!res.data || res.data.length === 0) {
-    container.innerHTML = "<p>No orders found.</p>";
+  if(!res.data || res.data.length === 0){
+    box.innerHTML = "<p>No orders found.</p>";
     return;
   }
 
-  res.data.forEach((row, i) => {
-    const card = document.createElement("div");
+  res.data.forEach(row => {
+    let card = document.createElement("div");
     card.className = "card";
-
     card.innerHTML = `
-      <h3>Order #${row[0]}</h3>
-      <p><b>Distributor:</b> ${row[6]}</p>
-      <p><b>Order Received?:</b> ${row[8]}</p>
+      <h3>Order #${row.OrderID}</h3>
+      <p><b>Distributor:</b> ${row.Distributor}</p>
+      <p><b>Order Received:</b> ${row.OrderReceived}</p>
 
-      <button class="btn btn-primary" onclick="openProcess(${i+2}, '${row[0]}')">Process</button>
+      <button class="btn btn-primary" onclick="openProcess('${row.OrderID}')">
+        Process
+      </button>
     `;
-
-    container.appendChild(card);
+    box.appendChild(card);
   });
 }
 
-/* ---------- PROCESS SCREEN ---------- */
-let selectedRow = null;
-let selectedOrderId = null;
-
-function openProcess(row, id) {
-  selectedRow = row;
-  selectedOrderId = id;
+/* -------- OPEN PROCESS PAGE -------- */
+function openProcess(orderId){
   showPage("processPage");
 
   document.getElementById("processContainer").innerHTML = `
     <div class="card">
-      <h3>Processing Order #${id}</h3>
+      <h3>Processing Order #${orderId}</h3>
 
       <label>Order Received?</label>
-      <select id="orderReceived" onchange="orderReceivedChanged()">
+      <select id="orderReceivedSelect" onchange="toggleOrderReceived()">
         <option>No</option>
         <option>Yes</option>
       </select>
 
-      <div id="visitImageSection" class="section hidden">
+      <div id="visitSection" class="section hidden">
         <h4>Visit Image Check</h4>
         <button class="btn btn-success">Mark Done</button>
       </div>
 
       <div id="piSection" class="section hidden">
         <h4>PI Section</h4>
-        <label>PI Sent?</label>
-        <select>
-          <option>No</option><option>Yes</option>
-        </select>
+        <select><option>No</option><option>Yes</option></select>
       </div>
 
       <div id="advanceSection" class="section hidden">
-        <h4>Advance Payment</h4>
-        <input type="number" placeholder="Advance Amount">
-        <label>Received?</label>
-        <select><option>No</option><option>Yes</option></select>
+        <h4>Advance</h4>
+        <input type="number" placeholder="Amount">
       </div>
 
       <div id="readySection" class="section hidden">
         <h4>Ready to Process?</h4>
-        <select onchange="readyChanged()" id="readySelect">
+        <select id="readySelect" onchange="toggleReady()">
           <option>No</option>
           <option>Partially</option>
           <option>Yes</option>
@@ -89,8 +81,8 @@ function openProcess(row, id) {
       </div>
 
       <div id="partialSection" class="section hidden"></div>
+
       <div id="mainProcess" class="section hidden">
-        <h4>Main Processing</h4>
         <button class="btn btn-primary">Challan</button>
         <button class="btn btn-primary">CTN Weight</button>
         <button class="btn btn-primary">Invoice</button>
@@ -98,4 +90,47 @@ function openProcess(row, id) {
       </div>
     </div>
   `;
+}
+
+/* ---------- Order Received Logic ---------- */
+function toggleOrderReceived(){
+  let v = document.getElementById("orderReceivedSelect").value;
+
+  document.getElementById("visitSection").classList.toggle("hidden", v !== "No");
+  document.getElementById("piSection").classList.toggle("hidden", v !== "Yes");
+  document.getElementById("advanceSection").classList.toggle("hidden", v !== "Yes");
+  document.getElementById("readySection").classList.toggle("hidden", v !== "Yes");
+}
+
+/* ---------- Ready to Process Logic ---------- */
+function toggleReady(){
+  let v = document.getElementById("readySelect").value;
+
+  let partialDiv = document.getElementById("partialSection");
+  let mainDiv = document.getElementById("mainProcess");
+
+  if(v === "Yes"){
+    partialDiv.classList.add("hidden");
+    mainDiv.classList.remove("hidden");
+  }
+  if(v === "No"){
+    partialDiv.classList.remove("hidden");
+    partialDiv.innerHTML = `
+      <h4>Pending Reason</h4>
+      <select><option>Stock</option><option>Payment</option></select>
+      <button class="btn btn-warning">Save Pending</button>
+    `;
+    mainDiv.classList.add("hidden");
+  }
+  if(v === "Partially"){
+    partialDiv.classList.remove("hidden");
+    partialDiv.innerHTML = `
+      <h4>Partial Order Processing</h4>
+      <label>Reason</label>
+      <select><option>Stock</option><option>Payment</option></select>
+      <input type="number" placeholder="Qty">
+      <button class="btn btn-success">Save Partial</button>
+    `;
+    mainDiv.classList.remove("hidden");
+  }
 }
