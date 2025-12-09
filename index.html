@@ -1,34 +1,39 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Hicks Order Processing</title>
-  <link rel="stylesheet" href="style.css">
+  <base target="_top">
+  <style>
+    body { font-family: Arial; background:#f4f6f9; padding:20px; }
+    .card { background:#fff; padding:20px; border-radius:8px; margin-bottom:10px; }
+    button { background:#007bff; color:#fff; border:none; padding:10px 18px; border-radius:6px; cursor:pointer; }
+  </style>
 </head>
 
 <body>
-
-<div class="nav">
-  <button onclick="showPage('ordersPage')">Orders</button>
-  <button onclick="showPage('processPage')">Processing</button>
-  <button onclick="showPage('pendingPage')">Pending</button>
-</div>
-
-<div id="ordersPage" class="page">
   <h2>📦 Orders List</h2>
-  <div id="ordersContainer">Loading Orders...</div>
-</div>
+  <div id="orders"></div>
 
-<div id="processPage" class="page" style="display:none;">
-  <h2>⚙ Process Order</h2>
-  <div id="processContainer">Select an order from Orders page</div>
-</div>
+  <script>
+    google.script.run.withSuccessHandler(showOrders).getOrders();
 
-<div id="pendingPage" class="page" style="display:none;">
-  <h2>⏳ Pending Orders</h2>
-  <div id="pendingContainer">Loading...</div>
-</div>
+    function showOrders(list) {
+      let html = "";
+      list.forEach(o => {
+        html += `
+          <div class="card">
+            <h3>Order #${o.orderId}</h3>
+            <p><b>Distributor:</b> ${o.distributor}</p>
+            <p><b>Order Received:</b> ${o.orderReceived}</p>
+            <button onclick="process('${o.orderId}')">Process</button>
+          </div>
+        `;
+      });
+      document.getElementById("orders").innerHTML = html;
+    }
 
-<script src="script.js"></script>
-
+    function process(id) {
+      window.location = "?page=process&orderId=" + id;
+    }
+  </script>
 </body>
 </html>
